@@ -7,7 +7,7 @@ int str_comparator(void *a, void *b) {
 }
 
 int main(int argc, char *argv[]) {
-	avl_tree *tree = avl_init(&str_comparator);
+	avl_tree *tree = avl_init(&str_comparator, NULL);
 
 	char *names[] = {
 		"Hozna",
@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
 
 	avl_print(tree);
 	avl_remove(tree, "Adam");
+
+	avl_remove(tree, "Hanka");
 
 	avl_print(tree);
 	

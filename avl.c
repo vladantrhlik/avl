@@ -57,13 +57,6 @@ void rot_right(node *x, node *z) {
 	node *t23 = z->right;
 
 	x->left = t23; /* fix balance factor */
-	if (z->bfactor == 0) {
-		x->bfactor = 1;
-		z->bfactor = -1;
-	} else {
-		x->bfactor = 0;
-		z->bfactor = 0;
-	};
 	if (t23) t23->parent = x;
 
 	z->right = x;
@@ -135,7 +128,7 @@ void avl_print( avl_tree *avl ) {
 	printf("\n");
 }
 
-avl_tree *avl_init( int(comparator)(void *a, void *b) ) {
+avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a) ) {
 	/* sanity check */
 	if (!comparator) return NULL;
 
@@ -144,6 +137,7 @@ avl_tree *avl_init( int(comparator)(void *a, void *b) ) {
 
 	tree->root = NULL;
 	tree->comparator = comparator;
+	tree->free_f = free_f;
 
 	return tree;
 }
@@ -211,6 +205,7 @@ int avl_remove( avl_tree *avl, void *data ) {
 			/* no children */
 			if (!jonny->left && !jonny->right) {
 				if (parent_pointer) *parent_pointer = NULL;	
+				if (avl->free_f) avl->free_f(jonny->data);
 			}
 			/* one child */
 			else if (!jonny->left || !jonny->right) {
@@ -221,15 +216,17 @@ int avl_remove( avl_tree *avl, void *data ) {
 					*parent_pointer = replace;
 					replace->parent = jonny->parent;
 				}
+
+				if (avl->free_f) avl->free_f(jonny->data);
 			}
 			/* two children */
 			else {
 				/* get rightest left child */
 				node *rightest = jonny->left;
 				while (rightest->right) rightest = rightest->right;
-			    /* DON'T FREE DATA */	
-				jonny->data = rightest->data;
 
+				if (avl->free_f) avl->free_f(jonny->data);
+				jonny->data = rightest->data;
 
 				rightest->parent->right = rightest->left;
 				if (rightest->left) {
@@ -239,7 +236,7 @@ int avl_remove( avl_tree *avl, void *data ) {
 				jonny = rightest;
 			}
 			/* TODO generic freeing function */
-			//free(jonny);
+			free(jonny);
 			check_balance(avl->root);
 			return 0;
 
