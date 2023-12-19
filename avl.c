@@ -16,23 +16,30 @@ node *node_init(node *parent, void *data) {
 	return new;
 }
 
-void node_print(node *n) {
+/**
+ * Prints node and its children
+ */
+void node_print(node *n, void(*print)(void *a)) {
 	if (!n) return;
 	printf("(");
-	node_print(n->left);
-	printf("%s", n->data);
-	node_print(n->right);
+	node_print(n->left, print);
+	print(n->data);
+	node_print(n->right, print);
 	printf(")");
 }
 
+/**
+ * Absolute values of int
+ */
 int abs(int a) {
 	return a > 0 ? a : -a;
 }
 
+/**
+ * Simple rotation left
+ */
 void rot_left(node *x, node *z, node **root) {
 	if (!x || !z) return;
-
-	printf("rot_left: x=%s, z=%s\n", x->data, z->data);
 
 	node *t23 = z->left;
 
@@ -49,11 +56,11 @@ void rot_left(node *x, node *z, node **root) {
 	x->parent = z;
 }
 
+/**
+ * Simple rotation right
+ */
 void rot_right(node *x, node *z, node **root) {
 	if (!x || !z) return;
-
-	printf("rot_right: x=%s, z=%s\n", x->data, z->data);
-
 
 	node *t23 = z->right;
 
@@ -70,9 +77,10 @@ void rot_right(node *x, node *z, node **root) {
 	x->parent = z;
 }
 
+/**
+ * Balances subtrees of given node
+ */
 void fix_subtree(avl_tree *avl, node *n, int lh, int rh) {
-	printf("fixing subtree on %s: lh = %d, rh = %d\n", n->data, lh, rh);
-
 	if (rh > lh) {
 		if (n->right->bfactor >= 0) {
 			/* right right */
@@ -92,7 +100,6 @@ void fix_subtree(avl_tree *avl, node *n, int lh, int rh) {
 			rot_right(n, n->left, &avl->root);
 		}
 	}
-
 }
 
 /**
@@ -126,11 +133,12 @@ int check_balance(avl_tree *avl, node *n) {
 
 
 void avl_print(avl_tree *avl) {
-	node_print(avl->root);
+	if (!avl->print) return;
+	node_print(avl->root, avl->print);
 	printf("\n");
 }
 
-avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a)) {
+avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), void(*print)()) {
 	/* sanity check */
 	if (!comparator) return NULL;
 
@@ -140,6 +148,7 @@ avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a)) {
 	tree->root = NULL;
 	tree->comparator = comparator;
 	tree->free_f = free_f;
+	tree->print = print;
 
 	return tree;
 }
