@@ -27,5 +27,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	avl_print(tree);
+	avl_remove(tree, "Adam");
+
+	avl_print(tree);
 	
 }

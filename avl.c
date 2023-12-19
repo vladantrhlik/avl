@@ -191,5 +191,67 @@ int avl_insert( avl_tree *avl, void *data ) {
 	return 0;
 }
 
+int avl_remove( avl_tree *avl, void *data ) {
+	/* sanity check */
+	if (!avl || !data) return 1;
+	
+	node *jonny = avl->root;
+	while (jonny) {
+		int res = avl->comparator(data, jonny->data);
+		if (!res) {
+			/* get pointer from parent of jonny (or pointer to root) */
+			node **parent_pointer = NULL;
+			if (jonny->parent) {
+				if (jonny->parent->left == jonny) parent_pointer = &jonny->parent->left; 
+				else parent_pointer = &jonny->parent->right;
+			} else if (jonny == avl->root) {
+				parent_pointer = &avl->root;
+			}
+
+			/* no children */
+			if (!jonny->left && !jonny->right) {
+				if (parent_pointer) *parent_pointer = NULL;	
+			}
+			/* one child */
+			else if (!jonny->left || !jonny->right) {
+				node *replace = jonny->left;
+				if (jonny->right) replace = jonny->right;
+
+				if (parent_pointer) {
+					*parent_pointer = replace;
+					replace->parent = jonny->parent;
+				}
+			}
+			/* two children */
+			else {
+				/* get rightest left child */
+				node *rightest = jonny->left;
+				while (rightest->right) rightest = rightest->right;
+			    /* DON'T FREE DATA */	
+				jonny->data = rightest->data;
+
+
+				rightest->parent->right = rightest->left;
+				if (rightest->left) {
+					rightest->left->parent = rightest->parent;
+				}
+
+				jonny = rightest;
+			}
+			/* TODO generic freeing function */
+			//free(jonny);
+			check_balance(avl->root);
+			return 0;
+
+		} else if (res < 0) {
+			jonny = jonny->left;
+		} else {
+			jonny = jonny->right;
+		}
+
+	}
+
+	return 1;
+}
 
 
