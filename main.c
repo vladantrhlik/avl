@@ -9,27 +9,17 @@ int str_comparator(void *a, void *b) {
 int main(int argc, char *argv[]) {
 	avl_tree *tree = avl_init(&str_comparator, NULL);
 
-	char *names[] = {
-		"Hozna",
-		"Verča",
-		"Hanka",
-		"Antonín",
-		"Vladan",
-		"Olín",
-		"Adam",
-		"Ahoj",
-		"Aboj",
-		"Acoj"
-	};
-	int n = 10;
-	for (int i = 0; i<n; i++) {
-		avl_insert(tree, names[i]);
+	while (1) {
+		char *space = malloc(sizeof(char) * 32);
+		if (!space) return 1;
+		printf(": ");
+		scanf("%s", space);
+
+		if (!strcmp(space, "quit")) return 0;
+		
+		avl_insert(tree, space);
+		avl_print(tree);
 	}
-
-	avl_print(tree);
-	avl_remove(tree, "Adam");
-
-	avl_remove(tree, "Hanka");
 
 	avl_print(tree);
 	

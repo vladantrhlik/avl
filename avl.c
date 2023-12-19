@@ -16,7 +16,7 @@ node *node_init(node *parent, void *data) {
 	return new;
 }
 
-void node_print( node *n ) {
+void node_print(node *n) {
 	if (!n) return;
 	printf("(");
 	node_print(n->left);
@@ -29,7 +29,7 @@ int abs(int a) {
 	return a > 0 ? a : -a;
 }
 
-void rot_left(node *x, node *z) {
+void rot_left(node *x, node *z, node **root) {
 	if (!x || !z) return;
 
 	printf("rot_left: x=%s, z=%s\n", x->data, z->data);
@@ -40,6 +40,7 @@ void rot_left(node *x, node *z) {
 	if (t23) t23->parent = x;
 
 	z->left = x;
+	if (*root == x) *root = z;
 	z->parent = x->parent;
 	if (z->parent) {
 		if (z->parent->left == x) z->parent->left = z;
@@ -48,7 +49,7 @@ void rot_left(node *x, node *z) {
 	x->parent = z;
 }
 
-void rot_right(node *x, node *z) {
+void rot_right(node *x, node *z, node **root) {
 	if (!x || !z) return;
 
 	printf("rot_right: x=%s, z=%s\n", x->data, z->data);
@@ -60,6 +61,7 @@ void rot_right(node *x, node *z) {
 	if (t23) t23->parent = x;
 
 	z->right = x;
+	if (*root == x) *root = z;
 	z->parent = x->parent;
 	if (z->parent) {
 		if (z->parent->left == x) z->parent->left = z;
@@ -68,26 +70,26 @@ void rot_right(node *x, node *z) {
 	x->parent = z;
 }
 
-void fix_subtree(node *n, int lh, int rh) {
+void fix_subtree(avl_tree *avl, node *n, int lh, int rh) {
 	printf("fixing subtree on %s: lh = %d, rh = %d\n", n->data, lh, rh);
 
 	if (rh > lh) {
 		if (n->right->bfactor >= 0) {
 			/* right right */
-			rot_left(n, n->right);
+			rot_left(n, n->right, &avl->root);
 		} else {
 			/* right left */ 
-			rot_right(n->right, n->right->left);
-			rot_left(n, n->right);
+			rot_right(n->right, n->right->left, &avl->root);
+			rot_left(n, n->right, &avl->root);
 		}
 	} else {
 		if (n->left->bfactor <= 0) {
 			/* left left */
-			rot_right(n, n->left);
+			rot_right(n, n->left, &avl->root);
 		} else {
 			/* left right */
-			rot_left(n->left, n->left->right);
-			rot_right(n, n->left);
+			rot_left(n->left, n->left->right, &avl->root);
+			rot_right(n, n->left, &avl->root);
 		}
 	}
 
@@ -98,22 +100,22 @@ void fix_subtree(node *n, int lh, int rh) {
  *
  * @return int height of subtrees
  */
-int check_balance(node *n) {
+int check_balance(avl_tree *avl, node *n) {
 	/* sanity check */
-	if (!n) return 0;
+	if (!avl || !n) return 0;
 	
 	/* heights of subtrees */
-	int lh = check_balance(n->left);
-	int rh = check_balance(n->right);
+	int lh = check_balance(avl, n->left);
+	int rh = check_balance(avl, n->right);
 
 	n->bfactor = rh - lh;
 
 	if (n->bfactor <= -2 || n->bfactor >= 2) {
-		fix_subtree(n, lh, rh);
+		fix_subtree(avl, n, lh, rh);
 	}
 
-	lh = check_balance(n->left);
-	rh = check_balance(n->right);
+	lh = check_balance(avl, n->left);
+	rh = check_balance(avl, n->right);
 
 	n->bfactor = rh - lh;
 
@@ -123,12 +125,12 @@ int check_balance(node *n) {
 }
 
 
-void avl_print( avl_tree *avl ) {
+void avl_print(avl_tree *avl) {
 	node_print(avl->root);
 	printf("\n");
 }
 
-avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a) ) {
+avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a)) {
 	/* sanity check */
 	if (!comparator) return NULL;
 
@@ -143,7 +145,7 @@ avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a) ) 
 }
 
 
-int avl_insert( avl_tree *avl, void *data ) {
+int avl_insert(avl_tree *avl, void *data) {
 	/* sanity check */	
 	if (!avl || !data) return -1;
 
@@ -176,7 +178,7 @@ int avl_insert( avl_tree *avl, void *data ) {
 			*next = n;
 			avl_print(avl);
 			/* check balance from root */
-			check_balance(avl->root);
+			check_balance(avl, avl->root);
 			return 0;
 		}
 		jonny = *next;
@@ -185,7 +187,7 @@ int avl_insert( avl_tree *avl, void *data ) {
 	return 0;
 }
 
-int avl_remove( avl_tree *avl, void *data ) {
+int avl_remove(avl_tree *avl, void *data) {
 	/* sanity check */
 	if (!avl || !data) return 1;
 	
@@ -235,11 +237,10 @@ int avl_remove( avl_tree *avl, void *data ) {
 
 				jonny = rightest;
 			}
-			/* TODO generic freeing function */
-			free(jonny);
-			check_balance(avl->root);
-			return 0;
 
+			free(jonny);
+			check_balance(avl, avl->root);
+			return 0;
 		} else if (res < 0) {
 			jonny = jonny->left;
 		} else {
