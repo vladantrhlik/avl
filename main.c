@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
 
 		if (!strcmp(space, "quit")) return 0;
 		
+
 		avl_insert(tree, space);
 		avl_print(tree);
 	}

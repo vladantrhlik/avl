@@ -185,7 +185,6 @@ int avl_insert(avl_tree *avl, void *data) {
 		if (!*next) {
 			n->parent = jonny;
 			*next = n;
-			avl_print(avl);
 			/* check balance from root */
 			check_balance(avl, avl->root);
 			return 0;
@@ -261,4 +260,20 @@ int avl_remove(avl_tree *avl, void *data) {
 	return 1;
 }
 
+int avl_contains( avl_tree *avl, void *data ) {
+	if (!avl || !data) return 0;
+	
+	node *jonny = avl->root;
+	while (jonny) {
+		int res = avl->comparator(data, jonny->data);
+		if (!res) {
+			return 1;
+		} else if (res > 0) {
+			jonny = jonny->right;
+		} else {
+			jonny = jonny->left;
+		}
+	}
 
+	return 0;
+}

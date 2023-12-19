@@ -45,6 +45,11 @@ int avl_insert( avl_tree *avl, void *data );
 int avl_remove( avl_tree *avl, void *data );
 
 /**
+ * Checks if AVL contains given data
+ */
+int avl_contains( avl_tree *avl, void *data );
+
+/**
  * Prints whole AVL tree
  */
 void avl_print( avl_tree *avl );
