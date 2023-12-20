@@ -12,6 +12,7 @@ node *node_init(node *parent, void *data) {
 	new->parent = parent;
 	new->left = NULL;
 	new->right = NULL;
+	new->hsub = 0;
 
 	return new;
 }
@@ -126,8 +127,9 @@ int check_balance(avl_tree *avl, node *n) {
 
 	n->bfactor = rh - lh;
 
-
 	int height = abs(lh) > abs(rh) ? abs(lh) : abs(rh);
+	n->hsub = height;
+
 	return height + 1;
 }
 

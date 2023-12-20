@@ -9,9 +9,11 @@ typedef struct thenode{
 	struct thenode *left, *right, *parent;
 	/* balance factor */
 	int bfactor;
+	/* height of subtree */
+	int hsub;
 } node;
 
-node *node_init();
+node *node_init(node *parent, void *data);
 
 /**
  * AVL tree structure
@@ -32,7 +34,7 @@ typedef struct avl {
  *
  * @param comparator function for comparing two data
  */
-avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a), void(*print)());
+avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a), void(*print)(void *a));
 
 /**
  * Inserts data into AVL tree
