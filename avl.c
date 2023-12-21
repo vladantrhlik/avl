@@ -20,12 +20,16 @@ node *node_init(node *parent, void *data) {
 /**
  * Prints node and its children
  */
-void node_print(node *n, void(*print)(void *a)) {
+void node_print(node *n, char * (to_str)(void *a)) {
 	if (!n) return;
 	printf("(");
-	node_print(n->left, print);
-	print(n->data);
-	node_print(n->right, print);
+	node_print(n->left, to_str);
+
+	char *str = to_str(n->data);
+	printf("%s", str); 
+	free(str);
+
+	node_print(n->right, to_str);
 	printf(")");
 }
 
@@ -135,12 +139,12 @@ int check_balance(avl_tree *avl, node *n) {
 
 
 void avl_print(avl_tree *avl) {
-	if (!avl->print) return;
-	node_print(avl->root, avl->print);
+	if (!avl->to_str) return;
+	node_print(avl->root, avl->to_str);
 	printf("\n");
 }
 
-avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), void(*print)()) {
+avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), char*(to_str)(void *a)) {
 	/* sanity check */
 	if (!comparator) return NULL;
 
@@ -150,7 +154,7 @@ avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), vo
 	tree->root = NULL;
 	tree->comparator = comparator;
 	tree->free_f = free_f;
-	tree->print = print;
+	tree->to_str = to_str;
 
 	return tree;
 }

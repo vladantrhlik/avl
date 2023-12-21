@@ -4,6 +4,8 @@
 #include "avl.h"
 #include "avl_print.h"
 
+#define MAX_NODE_LEN 6
+
 int str_comparator(void *a, void *b) {
 	return strcmp(a, b);
 }
@@ -16,8 +18,10 @@ int int_comparator(void *a, void *b) {
 	return *((int *) a) - *((int *) b);
 }	
 
-void int_print(void *a) {
-	printf("%d", *((int *) a));
+char *itostr(void *a) {
+	char *out = malloc(MAX_NODE_LEN * sizeof(char));
+	sprintf(out, "%d", *((int*) a));
+	return out;
 }
 
 void int_free(void *a) {
@@ -42,9 +46,9 @@ int main(int argc, char *argv[]) {
 	}
 	*/
 
-	avl_tree *tree = avl_init(&int_comparator, &int_free, &int_print);
+	avl_tree *tree = avl_init(&int_comparator, &int_free, &itostr);
 
-	for (int i = 0; i<10; i++) {
+	for (int i = 0; i<20; i++) {
 		int *d = malloc(sizeof(int));
 		*d = rand()%100;
 		avl_insert(tree, d);
