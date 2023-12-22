@@ -3,7 +3,7 @@
 #include <string.h>
 #include "avl_print.h"
 
-#define TILE 4
+#define TILE 5
 
 void render_subtree(avl_tree *avl, node *n, int x, int y, int width, char **buffer) {
 	/* render node */
@@ -12,7 +12,7 @@ void render_subtree(avl_tree *avl, node *n, int x, int y, int width, char **buff
 		char *str = avl->to_str(n->data);
 		int off = (width - TILE) / 2;
 
-		sprintf(tilebuf, "%*s%0*d%*s", off, "", TILE, *((int*)n->data), off, "");
+		sprintf(tilebuf, "%*s%*s%*s", off, "", TILE+1, str, off, "");
 		//free(str);
 
 		if (n->left || n->right) {
@@ -25,7 +25,7 @@ void render_subtree(avl_tree *avl, node *n, int x, int y, int width, char **buff
 			render_subtree(avl, n->right, x+width/2, y+1, width/2, buffer);
 		}
 	} else {
-		sprintf(tilebuf, "%*s", width, " ");
+		sprintf(tilebuf, "%*s", width, "");
 	}
 	/* copy tile buffer to main buffer */
 	memcpy(&buffer[y][x], tilebuf, width);
@@ -33,25 +33,24 @@ void render_subtree(avl_tree *avl, node *n, int x, int y, int width, char **buff
 }
 
 void avl_cool_print(avl_tree *avl) {
+	/* number of tiles in buffer */
 	int height = avl->root->hsub + 1;
 	int width = 1 << (height-1);
 
-	char **buffer = malloc(height * sizeof(char));
+	char **buffer = malloc(height * sizeof(char *));
 	for (int i = 0; i<height; i++) {
 		buffer[i] = malloc(width * TILE * sizeof(char));
+		memset(buffer[i], ' ', width*TILE);
 	}
-
-	printf("buffer for %dx%d tiles allocated\n", width, height);
 
 	render_subtree(avl, avl->root, 0, 0, width*TILE, buffer);
 
-	printf("tree rendered\n");
-
-	/* print renderen tree */
+	/* print rendered tree */
 	for (int y = 0; y<height; y++) {
 		for (int x = 0; x<width*TILE; x++) {
 	  		printf("%c", buffer[y][x]);
 		}
 		printf("\n");
 	}
+	
 }

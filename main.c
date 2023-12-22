@@ -20,7 +20,7 @@ int int_comparator(void *a, void *b) {
 
 char *itostr(void *a) {
 	char *out = malloc(MAX_NODE_LEN * sizeof(char));
-	sprintf(out, "%d", *((int*) a));
+	sprintf(out, "%0*d", 5,*((int*) a));
 	return out;
 }
 
@@ -48,13 +48,14 @@ int main(int argc, char *argv[]) {
 
 	avl_tree *tree = avl_init(&int_comparator, &int_free, &itostr);
 
-	for (int i = 0; i<20; i++) {
+	for (int i = 0; i<30; i++) {
 		int *d = malloc(sizeof(int));
-		*d = rand()%100;
+		*d = rand()%1000;
 		avl_insert(tree, d);
 	}
 	avl_print(tree);
 	printf("\n");
 	avl_cool_print(tree);
-	
+
+	return 0;
 }
