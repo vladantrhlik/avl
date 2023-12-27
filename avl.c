@@ -20,12 +20,12 @@ node *node_init(node *parent, void *data) {
 /**
  * Prints node and its children
  */
-void node_print(node *n, char * (to_str)(void *a)) {
+void node_print(node *n, char * (to_str)(void *a, int w)) {
 	if (!n) return;
 	printf("(");
 	node_print(n->left, to_str);
 
-	char *str = to_str(n->data);
+	char *str = to_str(n->data, 6);
 	printf("%s", str); 
 	free(str);
 
@@ -144,7 +144,7 @@ void avl_print(avl_tree *avl) {
 	printf("\n");
 }
 
-avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), char*(to_str)(void *a)) {
+avl_tree *avl_init(int(comparator)(void *a, void *b), void(*free_f)(void *a), char*(to_str)(void *a, int w)) {
 	/* sanity check */
 	if (!comparator) return NULL;
 
@@ -282,4 +282,22 @@ int avl_contains( avl_tree *avl, void *data ) {
 	}
 
 	return 0;
+}
+
+void node_free(avl_tree *avl, node *n) {
+	if (!n) return;
+
+	node_free(avl, n->left);
+	node_free(avl, n->right);
+
+	avl->free_f(n->data);
+	free(n);
+}
+
+void avl_free(avl_tree **avl) {
+	if (!avl || !*avl) return;
+
+	node_free(*avl, (*avl)->root);
+	free(*avl);
+	*avl = NULL;
 }

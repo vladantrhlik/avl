@@ -26,7 +26,7 @@ typedef struct avl {
 	/* freeing function */
 	void (*free_f)(void *a);
 	/* print function */
-	char *(*to_str)(void *a);
+	char *(*to_str)(void *a, int width);
 } avl_tree;
 
 /**
@@ -34,7 +34,7 @@ typedef struct avl {
  *
  * @param comparator function for comparing two data
  */
-avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a), char *(*to_str)(void *a));
+avl_tree *avl_init( int(comparator)(void *a, void *b), void(*free_f)(void *a), char *(*to_str)(void *a, int w));
 
 /**
  * Inserts data into AVL tree
@@ -55,5 +55,10 @@ int avl_contains( avl_tree *avl, void *data );
  * Prints whole AVL tree
  */
 void avl_print( avl_tree *avl );
+
+/**
+ * Deallocates all memory used by avl
+ */
+void avl_free( avl_tree **avl);
 
 #endif
